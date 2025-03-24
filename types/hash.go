@@ -23,7 +23,7 @@ func (h Hash) String() string {
 
 func HashFromBytes(b []byte) Hash {
 	if len(b) != 32 {
-		err := fmt.Sprintf("lenght %d should be 32", len(b))
+		err := fmt.Sprintf("hash lenght %d should be 32", len(b))
 		panic(err)
 	}
 
