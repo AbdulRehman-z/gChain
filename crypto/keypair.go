@@ -1,0 +1,67 @@
+package crypto
+
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/sha256"
+	"math/big"
+
+	"github.com/AbdulRehman-z/goChain/types"
+)
+
+type PrivateKey struct {
+	key *ecdsa.PrivateKey
+}
+
+func (k PrivateKey) Sign(data []byte) (*Signature, error) {
+	r, s, err := ecdsa.Sign(rand.Reader, k.key, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Signature{
+		r: r,
+		s: s,
+	}, nil
+}
+
+func GeneratePrivateKey() PrivateKey {
+	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+
+	return PrivateKey{
+		key: privKey,
+	}
+}
+
+func (k PrivateKey) PublicKey() PublicKey {
+	return PublicKey{
+		key: &k.key.PublicKey,
+	}
+}
+
+type PublicKey struct {
+	key *ecdsa.PublicKey
+}
+
+func (k PublicKey) toSlice() []byte {
+	return elliptic.MarshalCompressed(
+		k.key, k.key.X, k.key.Y)
+}
+
+func (k PublicKey) Address() types.Address {
+	h := sha256.Sum256(k.toSlice())
+
+	return types.AddressFromBytes(h[len(h)-1:])
+}
+
+type Signature struct {
+	r, s *big.Int
+}
+
+func (s Signature) Verify(pubKey PublicKey, data []byte) bool {
+	return ecdsa.Verify(pubKey.key, data, s.r, s.s)
+}
