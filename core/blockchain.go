@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 type Blockchain struct {
 	headers   []*Header
 	validator Validator
@@ -40,6 +42,16 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 // HasBlock checks if a block with the given height exists in the blockchain.
 func (bc *Blockchain) HasBlock(height uint32) bool {
 	return height <= bc.Height()
+}
+
+func (bc *Blockchain) GetHeader(height uint32) (*Header, error) {
+	// fmt.Printf("Getting header for height %d\n", height)
+	fmt.Printf("Block height: %d Blockchain Height: %d\n", height, bc.Height())
+	if height > bc.Height() {
+		return nil, fmt.Errorf("height %d is greater than blockchain height %d", height, bc.Height())
+	}
+
+	return bc.headers[height], nil
 }
 
 // [0,1,2,3,4] => len is 5
